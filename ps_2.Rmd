@@ -1,0 +1,43 @@
+---
+title: "Problem-Set-2"
+author: "Caroline"
+date: "2/15/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(fec16)
+library(tidyverse)
+```
+
+```{q1 r}
+q1 <- results_house %>%
+  select(state, district_id, general_votes) %>%
+  drop_na() %>%
+  group_by(state, district_id) %>%
+  summarize(total_votes = sum(general_votes))  %>% 
+  summarize(mean_voters = mean(total_votes)) %>%
+  arrange(desc(mean_voters))
+
+ q1 
+```
+
+```{r}
+presidential_total <- results_president %>%
+  drop_na() %>%
+  group_by(state) %>%
+  summarize(presidential_votes = sum(general_votes)) 
+ 
+presidential_total
+
+  q2 <- results_senate %>%
+    drop_na() %>%
+    group_by(state) %>%
+    summarize(senate_votes = sum(general_votes)) %>%
+    inner_join(presidential_total, q2, by = "state")
+  
+  
+  q2
+```
+
