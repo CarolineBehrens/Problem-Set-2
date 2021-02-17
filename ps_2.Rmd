@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = FALSE)
 library(fec16)
 library(tidyverse)
+library(fivethirtyeight)
 ```
 
 ```{q1 r}
@@ -32,12 +33,59 @@ presidential_total <- results_president %>%
 presidential_total
 
   q2 <- results_senate %>%
-    drop_na() %>%
+    drop_na(general_votes) %>%
     group_by(state) %>%
     summarize(senate_votes = sum(general_votes)) %>%
-    inner_join(presidential_total, q2, by = "state")
+    inner_join(presidential_total, q2, by = "state") %>%
+    mutate(vote_difference = (presidential_votes - senate_votes))
   
   
   q2
+```
+
+```{r}
+results_house %>%
+  filter(party == "REP" | party == "DEM") %>%
+  drop_na(general_votes, primary_votes) %>%
+  ggplot(mapping = aes(x = primary_votes, y = general_votes)) +
+  geom_point() + 
+  labs(title = "Votes for House Candidates in 2016", subtitle = "Almost all candidates recieve more votes in general election", x = "Number of Votes in Primary Election", y = "Number of Votes in General Election", caption = "Source: Federal Election Commission") + 
+  scale_x_continuous(labels = scales::comma_format()) + 
+  scale_y_continuous(labels = scales::comma_format()) #+ 
+  #scale_color_manual(values(DEM ="dodgerblue", REP = "lightcoral"))
+
+
+  
+   
+```
+
+```{r q4}
+#comment
+results_senate() %>%
+  filter(!party %in% c("DEM", "REP")) %>%
+  drop_na(general_votes) %>%
+  group_by(state) %>%
+  summarise(percent= sum(general_votes), .groups = "drop") %>%
+  arrange(desc(percent)) %>%
+  slice(1:4) %>%
+  
+
+results_senate %>%
+  mutate(party = as.factor(party)) %>%
+  drop_na(general_votes) %>%
+  group_by(state, party)
+ summarise(party_total = sum(general_votes), .groups = "drop") %>%
+   semi_join(topfour, by = "state") %>%
+   group_by(state) %>%
+   top_n(3, party_total) %>%
+   ggplot(mapping = aes(x = fct_reorder(party, party_total),
+                        y = party_total / 1000)) +
+   facet_wrap(~state, scales = "free") +
+   geom_col()
+  
+```
+
+```{r q5}
+partisan_lean_state
 ```
 
